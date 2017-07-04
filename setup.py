@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
@@ -10,8 +10,9 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='odinweb.bottle',
+    namespace_packages=['odinweb'],
     version='0.1',
-    description="Toolkit for building web API's using Odin and Bottle",
+    description="Toolkit for building web API's using Odin and Bottle.",
     long_description=long_description,
     url='https://github.com/python-odin/odinweb.bottle',
     author='Tim Savage',
@@ -40,7 +41,7 @@ setup(
 
     keywords='odin web rest api bottle',
 
-    py_modules=['odinweb_bottle'],
+    packages=find_packages(include=('odinweb',)),
 
-    install_requires=['odin>=0.10', 'six', 'bottle'],
+    install_requires=['odinweb', 'bottle'],
 )
