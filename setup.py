@@ -43,5 +43,5 @@ setup(
 
     packages=find_packages(include=('odinweb',)),
 
-    install_requires=['odinweb', 'bottle'],
+    install_requires=['odinweb', 'bottle>=0.10'],
 )
