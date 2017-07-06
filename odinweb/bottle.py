@@ -23,7 +23,9 @@ Usage::
 from __future__ import absolute_import
 
 from bottle import Route, response, request
-from odinweb.data_structures import PathNode, ApiBase
+
+from odinweb.api import ApiBase
+from odinweb.data_structures import PathNode
 
 
 class Api(ApiBase):
