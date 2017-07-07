@@ -12,7 +12,7 @@ setup(
     name='odinweb.bottle',
     namespace_packages=['odinweb'],
     version='0.1',
-    description="Toolkit for building web API's using Odin and Bottle",
+    description="Toolkit for building web API's using Odin and Bottle.",
     long_description=long_description,
     url='https://github.com/python-odin/odinweb.bottle',
     author='Tim Savage',
@@ -43,5 +43,5 @@ setup(
 
     packages=find_packages(include=('odinweb',)),
 
-    install_requires=['odinweb', 'bottle'],
+    install_requires=['odinweb', 'bottle>=0.10'],
 )
