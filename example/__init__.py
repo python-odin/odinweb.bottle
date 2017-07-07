@@ -16,29 +16,22 @@ class UserApi(ResourceApi):
     resource = User
 
     @listing
-    def get_user_list(self):
+    def get_user_list(self, request, limit, offset):
         return [
             User(1, "tim"),
             User(2, "sara"),
-        ]
+        ], 2
 
     @detail
-    def get_user(self, resource_id):
-        return User(1, "tim")
+    def get_user(self, request, resource_id):
+        return User(resource_id, "tim")
 
-
-@app.route("/<name>/")
-def hello(name):
-    return "HelloWorld! " + name
-
-
-def sample_callback(request, **kwargs):
-    return "Response: {}\n{}\n{}".format(request.path, kwargs, request.method)
 
 app.merge(
     Api(
         ApiVersion(
             UserApi()
-        )
+        ),
+        debug_enabled=True
     )
 )

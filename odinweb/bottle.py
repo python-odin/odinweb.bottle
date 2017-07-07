@@ -62,8 +62,9 @@ class Api(ApiBase):
         def callback(**kwargs):
             resp = f(request, **kwargs)
 
-            # Todo: Deal with response object and map back to Bottle.response
-            response.add_header('content-type', 'text/plain')
+            response.status = resp.status
+            for k, v in resp.headers.items():
+                response[k] = v
 
-            return resp
+            return resp.body
         return callback
