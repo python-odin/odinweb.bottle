@@ -24,11 +24,11 @@ from __future__ import absolute_import
 
 from bottle import Route, response, request
 
-from odinweb.api import ApiBase
+from odinweb.api import ApiInterfaceBase
 from odinweb.data_structures import PathNode
 
 
-class Api(ApiBase):
+class Api(ApiInterfaceBase):
     def __iter__(self):
         """
         Convenience iterator to simplify registration with Bottle using :func:`bottle.Bottle.merge`. 
@@ -41,7 +41,7 @@ class Api(ApiBase):
         return []
 
     def routes(self):
-        return list(self._build_routes())
+        return list(self.build_routes())
 
     def parse_node(self, node):
         if isinstance(node, PathNode):
@@ -52,8 +52,8 @@ class Api(ApiBase):
         else:
             return str(node)
 
-    def _build_routes(self):
-        for path, methods, callback in super(Api, self)._build_routes():
+    def build_routes(self):
+        for path, methods, callback in super(Api, self).build_routes():
             callback = self._bound_callback(callback)
             for method in methods:
                 yield Route(self, path, method, callback)
