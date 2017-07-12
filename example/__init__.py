@@ -1,7 +1,7 @@
 import odin
 
 from bottle import Bottle
-from odinweb import api
+from odinweb import api, doc
 from odinweb.bottle import Api
 from odinweb.swagger import SwaggerSpec
 
@@ -24,13 +24,14 @@ class UserApi(api.ResourceApi):
         ], 2
 
     @api.create
+    @doc.response(201, 'Return added user.', User)
     def create_user(self, request):
         pass
 
     @api.detail
-    @api.operation_doc(tags=['user'])
-    @api.parameter_doc('full', api.IN_QUERY, type_=api.TYPE_BOOLEAN)
-    @api.response_doc(200, 'Return requested user.')
+    @doc.operation(tags=['user'])
+    @doc.parameter('full', api.IN_QUERY, type_=api.TYPE_BOOLEAN)
+    @doc.response(200, 'Return requested user.', User)
     def get_user(self, request, resource_id):
         """
         Get a user object
