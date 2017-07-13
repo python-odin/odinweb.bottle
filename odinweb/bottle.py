@@ -28,6 +28,23 @@ from odinweb.api import ApiInterfaceBase
 from odinweb.data_structures import PathNode
 
 
+class RequestProxy(object):
+    def __init__(self, r):
+        self.GET = r.GET
+        self.POST = r.POST
+        self.headers = r.headers
+        self.method = r.method
+        self.request = r
+
+    @property
+    def body(self):
+        return self.request.body.read()
+
+    @property
+    def host(self):
+        return self.request.environ.get('HTTP_HOST')
+
+
 class Api(ApiInterfaceBase):
     def __iter__(self):
         """
@@ -45,10 +62,13 @@ class Api(ApiInterfaceBase):
 
     def parse_node(self, node):
         if isinstance(node, PathNode):
-            if node.type_args:
-                return "<{}:{}({})>".format(node.name, node.type, ', '.join(node.type_args))
+            if node.type in ('re', 'int', 'float', 'path'):
+                if node.type_args:
+                    return "<{}:{}({})>".format(node.name, node.type, ', '.join(node.type_args))
+                else:
+                    return "<{}:{}>".format(node.name, node.type)
             else:
-                return "<{}:{}>".format(node.name, node.type)
+                return "<{}>".format(node.name)
         else:
             return str(node)
 
@@ -60,7 +80,7 @@ class Api(ApiInterfaceBase):
 
     def _bound_callback(self, f):
         def callback(**kwargs):
-            resp = f(request, **kwargs)
+            resp = f(RequestProxy(request), **kwargs)
 
             response.status = resp.status
             for k, v in resp.headers.items():
