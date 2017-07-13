@@ -5,18 +5,18 @@ from odinweb import api, doc
 from odinweb.bottle import Api
 from odinweb.swagger import SwaggerSpec
 
-app = Bottle()
-
 
 class User(odin.Resource):
     id = odin.IntegerField()
     name = odin.StringField()
+    role = odin.StringField(choices=('a', 'b', 'c'))
 
 
 class UserApi(api.ResourceApi):
     resource = User
 
     @api.listing
+    @doc.operation(tags=['user'])
     def get_user_list(self, request, limit, offset):
         return [
             User(1, "tim"),
@@ -24,13 +24,17 @@ class UserApi(api.ResourceApi):
         ], 2
 
     @api.create
-    @doc.response(201, 'Return added user.', User)
+    @doc.body_param(User)
+    @doc.operation(tags=['user'])
+    @doc.response(200, 'Return new user', User)
     def create_user(self, request):
-        pass
+        user = self.get_resource(request)
+        user.id = 3
+        return user
 
     @api.detail
     @doc.operation(tags=['user'])
-    @doc.parameter('full', api.IN_QUERY, type_=api.TYPE_BOOLEAN)
+    @doc.parameter('full', api.In.Query, type_=api.Type.Boolean)
     @doc.response(200, 'Return requested user.', User)
     def get_user(self, request, resource_id):
         """
@@ -38,15 +42,11 @@ class UserApi(api.ResourceApi):
         """
         return User(resource_id, "tim")
 
-    @api.update
-    def update_user(self, request, resource_id):
-        pass
-
-
+app = Bottle()
 app.merge(
     Api(
         api.ApiVersion(
-            SwaggerSpec(title="Bottle API Swagger"),
+            SwaggerSpec(title="Bottle API Swagger", enable_ui=True),
             UserApi(),
         ),
         debug_enabled=True
