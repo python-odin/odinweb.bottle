@@ -24,9 +24,7 @@ class UserApi(api.ResourceApi):
         ], 2
 
     @api.create
-    @doc.body_param(User)
     @doc.operation(tags=['user'])
-    @doc.response(200, 'Return new user', User)
     def create_user(self, request):
         user = self.get_resource(request)
         user.id = 3
@@ -35,7 +33,6 @@ class UserApi(api.ResourceApi):
     @api.detail
     @doc.operation(tags=['user'])
     @doc.query_param('full', type=api.Type.Boolean)
-    @doc.response(200, 'Return requested user.', User)
     def get_user(self, request, resource_id):
         """
         Get a user object

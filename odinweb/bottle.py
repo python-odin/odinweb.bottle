@@ -25,7 +25,18 @@ from __future__ import absolute_import
 from bottle import Route, response, request
 
 from odinweb.api import ApiInterfaceBase
+from odinweb.constants import Type
 from odinweb.data_structures import PathNode
+
+
+TYPE_MAP = {
+    Type.String: 'str',
+    Type.Number: 'float',
+    Type.Integer: 'int',
+    Type.Boolean: 'bool',
+    Type.Array: 'list',
+    Type.File: 'string',
+}
 
 
 class RequestProxy(object):
@@ -62,11 +73,12 @@ class Api(ApiInterfaceBase):
 
     def parse_node(self, node):
         if isinstance(node, PathNode):
-            if node.type in ('re', 'int', 'float', 'path'):
+            if node.type in TYPE_MAP:
+                node_type = TYPE_MAP[node.type]
                 if node.type_args:
-                    return "<{}:{}({})>".format(node.name, node.type, ', '.join(node.type_args))
+                    return "<{}:{}({})>".format(node.name, node_type, ', '.join(node.type_args))
                 else:
-                    return "<{}:{}>".format(node.name, node.type)
+                    return "<{}:{}>".format(node.name, node_type)
             else:
                 return "<{}>".format(node.name)
         else:
