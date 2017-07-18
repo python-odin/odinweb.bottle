@@ -32,12 +32,13 @@ class UserApi(api.ResourceApi):
 
     @api.detail
     @doc.operation(tags=['user'])
-    @doc.query_param('full', type=api.Type.Boolean)
+    @doc.query_param('full', api.Type.Boolean)
     def get_user(self, request, resource_id):
         """
         Get a user object
         """
         return User(resource_id, "tim")
+
 
 app = Bottle()
 app.merge(
