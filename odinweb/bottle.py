@@ -34,8 +34,8 @@ TYPE_MAP = {
     Type.Number: 'float',
     Type.Integer: 'int',
     Type.Boolean: 'bool',
-    Type.Array: 'list',
-    Type.File: 'string',
+    # Type.Array: 'list',
+    # Type.File: 'string',
 }
 
 
@@ -71,28 +71,28 @@ class Api(ApiInterfaceBase):
     def routes(self):
         return list(self.build_routes())
 
-    def parse_node(self, node):
-        if isinstance(node, PathNode):
-            if node.type in TYPE_MAP:
-                node_type = TYPE_MAP[node.type]
-                if node.type_args:
-                    return "<{}:{}({})>".format(node.name, node_type, ', '.join(node.type_args))
-                else:
-                    return "<{}:{}>".format(node.name, node_type)
-            else:
-                return "<{}>".format(node.name)
-        else:
-            return str(node)
+    def _build_routes(self):
+        for url_path, operation in self.op_paths():
+            path = url_path.format(self.node_formatter)
+            for method in operation.methods:
+                yield Route(self, path, method, self._bound_callback(operation))
 
-    def build_routes(self):
-        for path, methods, callback in super(Api, self).build_routes():
-            callback = self._bound_callback(callback)
-            for method in methods:
-                yield Route(self, path, method, callback)
+    @staticmethod
+    def node_formatter(path_node):
+        # type: (PathNode) -> str
+        """
+        Format a node to be consumable by the `UrlPath.parse`.
+        """
+        if path_node.type:
+            node_type = TYPE_MAP.get(path_node.type, 'str')
+            if path_node.type_args:
+                return "<{}:{}({})>".format(path_node.name, node_type, ', '.join(path_node.type_args))
+            return "<{}:{}>".format(path_node.name, node_type)
+        return "<{}>".format(path_node.name)
 
-    def _bound_callback(self, f):
-        def callback(**kwargs):
-            resp = f(RequestProxy(request), **kwargs)
+    def _bound_callback(self, operation):
+        def callback(**path_args):
+            resp = self.dispatch(operation, RequestProxy(request), **path_args)
 
             response.status = resp.status
             for k, v in resp.headers.items():

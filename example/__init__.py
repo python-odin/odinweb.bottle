@@ -14,9 +14,9 @@ class User(odin.Resource):
 
 class UserApi(api.ResourceApi):
     resource = User
+    tags = ['user']
 
     @api.listing
-    @doc.operation(tags=['user'])
     def get_user_list(self, request, limit, offset):
         return [
             User(1, "tim"),
@@ -24,14 +24,11 @@ class UserApi(api.ResourceApi):
         ], 2
 
     @api.create
-    @doc.operation(tags=['user'])
-    def create_user(self, request):
-        user = self.get_resource(request)
+    def create_user(self, request, user):
         user.id = 3
         return user
 
     @api.detail
-    @doc.operation(tags=['user'])
     @doc.query_param('full', api.Type.Boolean)
     def get_user(self, request, resource_id):
         """
