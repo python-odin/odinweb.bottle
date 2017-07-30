@@ -24,7 +24,7 @@ from __future__ import absolute_import
 
 from bottle import Route, response, request
 
-from odinweb.api import ApiInterfaceBase
+from odinweb.containers import ApiInterfaceBase
 from odinweb.constants import Type
 from odinweb.data_structures import PathNode
 

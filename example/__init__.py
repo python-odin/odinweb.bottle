@@ -7,9 +7,20 @@ from odinweb.swagger import SwaggerSpec
 
 
 class User(odin.Resource):
+    """
+    User resource
+    """
     id = odin.IntegerField()
+    username = odin.StringField()
     name = odin.StringField()
+    email = odin.EmailField()
     role = odin.StringField(choices=('a', 'b', 'c'))
+
+USERS = {
+    1: User(1, 'pimpstar24', 'Bender', 'Rodreges', 'bender@ilovebender.com'),
+    2: User(2, 'zoidberg', 'Zoidberg', '', 'zoidberg@freemail.web'),
+    3: User(3, 'amylove79', 'Amy', 'Wong', 'awong79@marslink.web'),
+}
 
 
 class UserApi(api.ResourceApi):
@@ -17,15 +28,17 @@ class UserApi(api.ResourceApi):
     tags = ['user']
 
     @api.listing
-    def get_user_list(self, request, limit, offset):
-        return [
-            User(1, "tim"),
-            User(2, "sara"),
-        ], 2
+    def get_user_list(self, request, offset, limit):
+        return USERS[offset:limit], len(USERS)
 
     @api.create
     def create_user(self, request, user):
-        user.id = 3
+        global USERS
+
+        # Add user to list
+        user.id = len(USERS)
+        USERS[user.id] = user
+
         return user
 
     @api.detail
@@ -34,7 +47,10 @@ class UserApi(api.ResourceApi):
         """
         Get a user object
         """
-        return User(resource_id, "tim")
+        user = USERS.get(resource_id)
+        if not user:
+            raise api.Error.from_status(api.HTTPStatus.NOT_FOUND)
+        return user
 
 
 app = Bottle()
