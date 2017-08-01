@@ -11,7 +11,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
     name='odinweb.bottle',
     namespace_packages=['odinweb'],
-    version='0.1',
+    version='0.2',
     description="Toolkit for building web API's using Odin and Bottle.",
     long_description=long_description,
     url='https://github.com/python-odin/odinweb.bottle',
