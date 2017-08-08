@@ -1,2 +1,2 @@
-odin >= 1.1.1
+odinweb >= 0.2.1
 bottle
