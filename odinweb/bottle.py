@@ -22,15 +22,14 @@ Usage::
 """
 from __future__ import absolute_import
 
-from bottle import Route, response, request
+from bottle import Route, response, request, BaseRequest
 
 from odinweb.containers import ApiInterfaceBase
-from odinweb.constants import Type
-from odinweb.data_structures import PathParam
-
+from odinweb.constants import Type, Method
+from odinweb.data_structures import PathParam, MultiValueDict
 
 TYPE_MAP = {
-    Type.String: 'str',
+    Type.String: 're:[-_.\w\d]+',
     Type.Number: 'float',
     Type.Integer: 'int',
     Type.Boolean: 'bool',
@@ -41,19 +40,22 @@ TYPE_MAP = {
 
 class RequestProxy(object):
     def __init__(self, r):
-        self.GET = r.GET
-        self.POST = r.POST
+        # type: (BaseRequest) -> None
+        self.scheme = r.urlparts.scheme
+        self.host = r.urlparts.netloc
+        self.path = r.urlparts.path
+        self.GET = MultiValueDict(r.GET.allitems())
         self.headers = r.headers
-        self.method = r.method
+        try:
+            self.method = Method[r.method]
+        except KeyError:
+            self.method = None
+        self.POST = MultiValueDict(r.POST.allitems())
         self.request = r
 
     @property
     def body(self):
         return self.request.body.read()
-
-    @property
-    def host(self):
-        return self.request.environ.get('HTTP_HOST')
 
 
 class Api(ApiInterfaceBase):
@@ -61,21 +63,7 @@ class Api(ApiInterfaceBase):
         """
         Convenience iterator to simplify registration with Bottle using :func:`bottle.Bottle.merge`. 
         """
-        return iter(self.routes())
-
-    @property
-    def plugins(self):
-        # Placeholder to match the Bottle App API.
-        return []
-
-    def routes(self):
-        return list(self.build_routes())
-
-    def _build_routes(self):
-        for url_path, operation in self.op_paths():
-            path = url_path.format(self.node_formatter)
-            for method in operation.methods:
-                yield Route(self, path, method, self._bound_callback(operation))
+        return self._build_routes()
 
     @staticmethod
     def node_formatter(path_node):
@@ -86,9 +74,17 @@ class Api(ApiInterfaceBase):
         if path_node.type:
             node_type = TYPE_MAP.get(path_node.type, 'str')
             if path_node.type_args:
-                return "<{}:{}({})>".format(path_node.name, node_type, ', '.join(path_node.type_args))
+                return "<{}:{}:{}>".format(path_node.name, node_type, ', '.join(path_node.type_args))
             return "<{}:{}>".format(path_node.name, node_type)
         return "<{}>".format(path_node.name)
+
+    @property
+    def plugins(self):
+        # Placeholder to match the Bottle App API.
+        return []
+
+    def routes(self):
+        return list(self._build_routes())
 
     def _bound_callback(self, operation):
         def callback(**path_args):
@@ -100,3 +96,9 @@ class Api(ApiInterfaceBase):
 
             return resp.body
         return callback
+
+    def _build_routes(self):
+        for url_path, operation in self.op_paths():
+            path = url_path.format(self.node_formatter)
+            for method in operation.methods:
+                yield Route(self, path, method.value, self._bound_callback(operation))
