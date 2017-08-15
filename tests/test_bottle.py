@@ -29,7 +29,25 @@ def test_request_proxy():
     (PathParam('foo'), "<foo:int>"),
     (PathParam('foo', Type.String), "<foo:re:[-\w.~,!%]+>"),
     (PathParam('foo', Type.Boolean), "<foo:bool>"),
+    (PathParam('foo', None), "<foo>"),
 ))
 def test_node_formatter(path_node, expected):
     actual = bottle.Api.node_formatter(path_node)
     assert actual == expected
+
+
+class TestApi(object):
+    def test_merge_api_and_request(self):
+        test_app = Bottle(catchall=False)
+        app = webtest.TestApp(test_app)
+        target = bottle.Api()
+
+        @target.operation('{foo:String}')
+        def sample_operation(request, foo):
+            assert isinstance(request, bottle.RequestProxy)
+            assert foo == 'eek'
+            return 'OK'
+
+        test_app.merge(target)
+
+        assert app.get('/api/eek', expect_errors=False).body == '"OK"'

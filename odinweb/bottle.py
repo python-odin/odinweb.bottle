@@ -87,8 +87,6 @@ class Api(ApiInterfaceBase):
         """
         if path_node.type:
             node_type = TYPE_MAP.get(path_node.type, 'str')
-            if path_node.type_args:
-                return "<{}:{}:{}>".format(path_node.name, node_type, ', '.join(path_node.type_args))
             return "<{}:{}>".format(path_node.name, node_type)
         return "<{}>".format(path_node.name)
 
