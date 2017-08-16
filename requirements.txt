@@ -1,2 +1,2 @@
-odinweb >= 0.2.1
+oodinweb >=0.3
 bottle
