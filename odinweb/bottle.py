@@ -27,9 +27,10 @@ from bottle import Route, response, request, BaseRequest
 # Imports for typing support
 from typing import Iterator, List  # noqa
 
+from odin.utils import lazy_property
 from odinweb.containers import ApiInterfaceBase
 from odinweb.constants import Type, Method, PATH_STRING_RE
-from odinweb.data_structures import PathParam, MultiValueDict
+from odinweb.data_structures import PathParam, MultiValueDict, BaseHttpRequest
 
 TYPE_MAP = {
     Type.Integer: 'int',
@@ -47,25 +48,57 @@ TYPE_MAP = {
 }
 
 
-class RequestProxy(object):
+class RequestProxy(BaseHttpRequest):
     def __init__(self, r):
         # type: (BaseRequest) -> None
-        self.scheme = r.urlparts.scheme
-        self.host = r.urlparts.netloc
-        self.path = r.urlparts.path
-        self.GET = MultiValueDict(r.GET.allitems())
-        self.headers = r.headers
-        try:
-            self.method = Method[r.method]
-        except KeyError:
-            self.method = None
-        self.POST = MultiValueDict(r.POST.allitems())
-
         self.request = r
 
-    @property
+    @lazy_property
+    def environ(self):
+        return self.request.environ
+
+    @lazy_property
+    def method(self):
+        try:
+            return Method(self.request.method)
+        except KeyError:
+            pass
+
+    @lazy_property
+    def scheme(self):
+        return self.request.urlparts.scheme
+
+    @lazy_property
+    def host(self):
+        return self.request.urlparts.netloc
+
+    @lazy_property
+    def path(self):
+        return self.request.urlparts.path
+
+    @lazy_property
+    def query(self):
+        return MultiValueDict(self.request.GET.allitems())
+
+    @lazy_property
+    def headers(self):
+        return self.request.headers
+
+    @lazy_property
+    def cookies(self):
+        return self.request.cookies
+
+    @lazy_property
+    def session(self):
+        raise NotImplemented("Not supplied by Bottle")
+
+    @lazy_property
     def body(self):
         return self.request.body.read()
+    
+    @lazy_property
+    def form(self):
+        return MultiValueDict(self.request.POST.allitems())
 
 
 class Api(ApiInterfaceBase):
