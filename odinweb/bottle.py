@@ -24,13 +24,14 @@ from __future__ import absolute_import
 
 from bottle import Route, response, request, BaseRequest
 
-# Imports for typing support
-from typing import Iterator, List  # noqa
-
 from odin.utils import lazy_property
 from odinweb.containers import ApiInterfaceBase
 from odinweb.constants import Type, Method, PATH_STRING_RE
 from odinweb.data_structures import PathParam, MultiValueDict, BaseHttpRequest
+
+# Imports for typing support
+from typing import Iterator, List  # noqa
+
 
 TYPE_MAP = {
     Type.Integer: 'int',

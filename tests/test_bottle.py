@@ -8,22 +8,26 @@ from bottle import Bottle, request
 from odinweb import bottle
 from odinweb.constants import Method, Type
 from odinweb.data_structures import PathParam
-from odinweb.testing import check_request_proxy
 
 
 def test_request_proxy():
     test_app = Bottle(catchall=False)
     app = webtest.TestApp(test_app)
 
-    @test_app.route('/')
+    @test_app.route('/', method='POST')
     def test_method():
         target = bottle.RequestProxy(request)
-        check_request_proxy(target)
-        assert target.method == Method.GET
+        assert target.method == Method.POST
+        assert set(target.query.getlist('a')) == {'1', '3'}
+        assert set(target.query.getlist('b')) == {'2'}
+        assert target.body == "123"
+        assert target.content_type == 'text/html'
+        assert target.origin == "http://localhost:9000"
         return 'OK'
 
-    assert app.get('/?a=1&b=2&a=3', expect_errors=False).body == 'OK'
-
+    result = app.post('/?a=1&b=2&a=3', expect_errors=False, content_type="text/html",
+                      headers={"Origin": "http://localhost:9000"}, params='123')
+    assert result.body == 'OK'
 
 @pytest.mark.parametrize('path_node, expected', (
     (PathParam('foo'), "<foo:int>"),
