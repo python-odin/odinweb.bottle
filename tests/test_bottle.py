@@ -28,7 +28,7 @@ def test_request_proxy():
 
     result = app.post('/?a=1&b=2&a=3', expect_errors=False, content_type="text/html",
                       headers={"Origin": "http://localhost:9000"}, params='123')
-    assert result.body == 'OK'
+    assert result.body == 'OK' if six.PY2 else b'OK'
 
 
 @pytest.mark.parametrize('path_node, expected', (
