@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import pytest
 import webtest
+import six
 
 from bottle import Bottle, request
 
@@ -20,7 +21,7 @@ def test_request_proxy():
         assert target.method == Method.POST
         assert set(target.query.getlist('a')) == {'1', '3'}
         assert set(target.query.getlist('b')) == {'2'}
-        assert target.body == "123"
+        assert target.body == "123" if six.PY2 else b'123'
         assert target.content_type == 'text/html'
         assert target.origin == "http://localhost:9000"
         return 'OK'
@@ -28,6 +29,7 @@ def test_request_proxy():
     result = app.post('/?a=1&b=2&a=3', expect_errors=False, content_type="text/html",
                       headers={"Origin": "http://localhost:9000"}, params='123')
     assert result.body == 'OK'
+
 
 @pytest.mark.parametrize('path_node, expected', (
     (PathParam('foo'), "<foo:int>"),
