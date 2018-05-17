@@ -56,4 +56,5 @@ class TestApi(object):
 
         test_app.merge(target)
 
-        assert app.get('/api/eek', expect_errors=False).body == '"OK"'
+        result = app.get('/api/eek', expect_errors=False)
+        assert result.body == '"OK"' if six.PY2 else b'"OK"'
